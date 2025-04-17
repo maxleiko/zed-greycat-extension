@@ -1,0 +1,15 @@
+id = "zed-greycat-extension"
+name = "GreyCat"
+version = "0.0.1"
+schema_version = 1
+authors = ["Maxime Tricoire <maxime.tricoire@datathings.com>"]
+description = "GreyCat support"
+repository = "https://github.com/maxleiko/zed-greycat-extension"
+
+[grammars.greycat]
+repository = "/home/leiko/dev/maxleiko/tree-sitter/tree-sitter-greycat"
+rev = "30ac9b4b75766485a8dc27d60fbfad4dfaafb43a"
+
+[language_servers.greycat]
+name = "GreyCat LSP"
+languages = ["GreyCat"]

@@ -1,0 +1,4 @@
+name = "GreyCat"
+grammar = "greycat"
+path_suffixes = ["gcl"]
+line_comments = ["// "]
