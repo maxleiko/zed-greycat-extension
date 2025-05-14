@@ -21,19 +21,12 @@
 ;--------------------------
 
 (call_expr
-  fn: (ident) @function)
-
-(call_expr
-  fn: (member_expr
-    property: (ident) @function.method))
-
-(call_expr
-  fn: (arrow_expr
-    property: (ident) @function.method))
-
-(call_expr
-  fn: (static_expr
-    property: (ident) @function.method))
+  fn: [
+    (ident) @function
+    (member_expr property: (ident) @function.method)
+    (arrow_expr property: (ident) @function.method)
+    (static_expr property: (ident) @function.method)
+  ])
 
 ; Properties
 ;-----------
@@ -74,6 +67,10 @@
 
 (type_ident (optional)) @punctualtion.special
 
+(string_substitution
+  "${" @punctuation.special
+  (expr) @embedded
+  "}" @punctuation.special)
 
 [
   ";"
