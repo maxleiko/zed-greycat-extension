@@ -16,8 +16,8 @@ impl Extension for GreyCatExtension {
         _worktree: &Worktree,
     ) -> Result<Command> {
         Ok(Command {
-            command: "/home/leiko/.greycat/misc/lang-server.js".into(),
-            args: vec!["--stdio".into()],
+            command: "/home/leiko/.greycat/bin/greycat-lang".into(),
+            args: vec!["server".into(), "--stdio".into()],
             env: vec![],
         })
     }

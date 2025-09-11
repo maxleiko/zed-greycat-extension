@@ -2,3 +2,5 @@ name = "GreyCat"
 grammar = "greycat"
 path_suffixes = ["gcl"]
 line_comments = ["// "]
+tab_size = 4
+hard_tabs = false
