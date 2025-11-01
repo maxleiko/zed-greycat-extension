@@ -1,144 +1,119 @@
-; Special identifiers
-;--------------------
+;────────────────────────────
+; Keywords
+;────────────────────────────
+[
+  "type" "enum" "extends" "fn" "var" "return" "throw"
+  "break" "continue" "if" "else" "for" "in" "while"
+  "do" "try" "catch" "at" "as" "is" "sampling" "limit"
+  "skip" "typeof" "abstract" "native" "private" "static"
+] @keyword
 
-([
- (type_decl name: (ident))
- (enum_decl name: (ident))
- (type_ident name: (ident))
-]) @type
+;────────────────────────────
+; Comments and documentation
+;────────────────────────────
+(line_comment) @comment
+(doc_comment) @comment.documentation
 
-; Function and method definitions
-;--------------------------------
+;────────────────────────────
+; Identifiers and types
+;────────────────────────────
+(ident) @variable
+(type_ident name: (ident) @type)
+(type_decl name: (ident) @type.definition)
+(enum_decl name: (ident) @type.definition)
+(enum_field (ident) @constant)
+(type_attr name: (ident) @field)
 
-(fn_decl
-  name: (ident) @function)
-(fn_param
-  name: (ident) @variable.parameter)
-(type_method
-  name: (ident) @function.method)
+;────────────────────────────
+; Functions & Methods
+;────────────────────────────
+(fn_decl name: (ident) @function)
+(type_method name: (ident) @function.method)
+(fn_param name: (ident) @parameter)
+(lambda_expr) @function
 
-; Function and method calls
-;--------------------------
+;────────────────────────────
+; Fields and properties
+;────────────────────────────
+(member_expr
+  property: (ident) @variable.member)
+(static_expr
+  property: (ident) @variable.member.static)
 
+;────────────────────────────
+; Function Calls
+;────────────────────────────
 (call_expr
-  fn: (ident) @function)
-
+  fn: (ident) @function.call)
 (call_expr
   fn: (member_expr
-    property: (ident) @function.method))
-
-(call_expr
-  fn: (arrow_expr
-    property: (ident) @function.method))
-
+        property: (ident) @function.method.call))
 (call_expr
   fn: (static_expr
-    property: (ident) @function.method))
+        property: (ident) @function.static.call))
 
-; Properties
-;-----------
-;
-;(property_identifier) @property
-
+;────────────────────────────
 ; Literals
-;---------
-
+;────────────────────────────
+(number) @number
+(duration) @number
+(char) @character
+(string) @string
+(string_fragment) @string
+(string_escape_sequence) @string.escape
+(string_substitution) @punctuation.special
 (this) @variable.builtin
 
+;────────────────────────────
+; Operators
+;────────────────────────────
 [
-  (true)
-  (false)
-  (null)
-] @constant.builtin
-
-[
-  (doc)
-] @comment
-
-[
-  (string)
-] @string
-
-(number) @number
-
-; Annotations
-;------------
-(annotation) @constant.builtin
-
-; Tokens
-;-------
-
-(string_substitution
-  "${" @punctuation.special
-  "}" @punctuation.special) @embedded
-
-(type_ident (optional)) @punctualtion.special
-
-
-[
-  ";"
-  "."
-  ","
-  "->"
-  "::"
-] @punctuation.delimiter
-
-[
-  "-"
-  "--"
-  "+"
-  "++"
-  "*"
-  "/"
-  "%"
-  "<"
-  "<="
-  "="
-  "=="
-  "!"
-  "!="
-  ">"
-  ">="
-  "^"
-  "&&"
-  "||"
-  "??"
-  "?="
+  "+" "-" "*" "/" "%" "^"
+  "=" "==" "!=" "<" "<=" ">" ">=" "&&" "||" "!"
+  "->" "::" "." "," ";" ":" "??"
 ] @operator
 
-[
-  "("
-  ")"
-  "["
-  "]"
-  "{"
-  "}"
-]  @punctuation.bracket
+;────────────────────────────
+; Punctuation
+;────────────────────────────
+["(" ")" "[" "]" "{" "}"] @punctuation.bracket
+["<" ">"] @punctuation.bracket
+["@"] @punctuation.special
 
-[
-  "as"
-  "at"
-  "is"
-  "break"
-  "catch"
-  "type"
-  "var"
-  "continue"
-  "do"
-  "else"
-  "extends"
-  "for"
-  "fn"
-  "if"
-  "in"
-  "return"
-  "native"
-  "static"
-  "abstract"
-  "private"
-  "throw"
-  "try"
-  "while"
-  "enum"
-  "typeof"
-] @keyword
+;────────────────────────────
+; Control flow structures
+;────────────────────────────
+(if_stmt "if" @keyword.control)
+(if_stmt "else" @keyword.control)
+(for_stmt "for" @keyword.control)
+(for_in_stmt "for" @keyword.control)
+(for_in_stmt "in" @keyword.operator)
+(while_stmt "while" @keyword.control)
+(do_while_stmt "do" @keyword.control)
+(do_while_stmt "while" @keyword.control)
+(try_stmt "try" @keyword.control)
+(try_stmt "catch" @keyword.control)
+(at_stmt "at" @keyword.control)
+(return_stmt "return" @keyword.control)
+(throw_stmt "throw" @keyword.control)
+(break_stmt "break" @keyword.control)
+(continue_stmt "continue" @keyword.control)
+
+;────────────────────────────
+; Object / struct / enum body
+;────────────────────────────
+(type_body) @structure
+(enum_body) @structure
+(object_field name: (_) @field)
+(object_expr) @constructor
+(array_expr) @constructor
+(tuple_expr) @constructor
+
+;────────────────────────────
+; Misc
+;────────────────────────────
+(modifiers) @keyword.modifier
+(annotation "@" @punctuation.special)
+(annotation (ident) @attribute)
+(annotation (args) @parameter)
+(optional) @punctuation.special
