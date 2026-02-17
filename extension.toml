@@ -8,7 +8,7 @@ repository = "https://github.com/maxleiko/zed-greycat-extension"
 
 [grammars.greycat]
 repository = "https://github.com/maxleiko/tree-sitter-greycat"
-commit = "1b98e00363101cd60825e59765acd69efed2fb68"
+commit = "f2484b37211d4608c7885359a0a5e3736252403e"
 
 [language_servers.greycat]
 name = "GreyCat Language Server"
