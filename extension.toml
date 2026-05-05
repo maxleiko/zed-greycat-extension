@@ -1,6 +1,6 @@
 id = "greycat"
 name = "GreyCat"
-version = "0.1.0"
+version = "0.1.1"
 schema_version = 1
 authors = ["maxleiko", "datathings"]
 description = "GreyCat support."
@@ -8,7 +8,7 @@ repository = "https://github.com/maxleiko/zed-greycat-extension"
 
 [grammars.greycat]
 repository = "https://github.com/maxleiko/tree-sitter-greycat"
-commit = "8427de2152f682d30d230fcfb6d9915db1be4a7b"
+commit = "1bec7c1d87186eed2e5e57c74cbb31e7de299ea4"
 
 [language_servers.greycat]
 name = "GreyCat Language Server"
