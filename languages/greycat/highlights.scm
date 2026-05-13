@@ -3,7 +3,7 @@
 ;────────────────────────────
 [
   "type" "enum" "extends" "fn" "var" "return" "throw"
-  "break" "continue" "if" "else" "for" "in" "while"
+  "break" "breakpoint" "continue" "if" "else" "for" "in" "while"
   "do" "try" "catch" "at" "as" "is" "sampling" "limit"
   "skip" "typeof" "abstract" "native" "private" "static"
 ] @keyword
@@ -55,8 +55,20 @@
 ;────────────────────────────
 ; Literals
 ;────────────────────────────
-(number) @number
-(duration) @number
+(number_int) @number
+(number_decimal) @number.float
+(number_scientific) @number.float
+
+; Suffixed literals: color the value parts as numbers and the suffix distinctly
+(number_suffixed
+  (number_int) @number)
+(number_suffixed
+  (number_decimal) @number.float)
+(number_suffixed
+  (number_scientific) @number.float)
+(number_suffixed
+  (number_suffix) @number.special)
+
 (char) @character
 (string) @string
 (string_fragment) @string
