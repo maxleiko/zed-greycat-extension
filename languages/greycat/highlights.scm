@@ -3,7 +3,7 @@
 ;────────────────────────────
 [
   "type" "enum" "extends" "fn" "var" "return" "throw"
-  "break" "breakpoint" "continue" "if" "else" "for" "in" "while"
+  "break" "continue" "breakpoint" "if" "else" "for" "in" "while"
   "do" "try" "catch" "at" "as" "is" "sampling" "limit"
   "skip" "typeof" "abstract" "native" "private" "static"
 ] @keyword
@@ -12,6 +12,7 @@
 ; Comments and documentation
 ;────────────────────────────
 (line_comment) @comment
+(block_comment) @comment
 (doc_comment) @comment.documentation
 
 ;────────────────────────────
@@ -37,10 +38,16 @@
 ;────────────────────────────
 (member_expr
   property: (ident) @variable.member)
+(member_expr
+  property: (string) @variable.member)
 (arrow_expr
   property: (ident) @variable.member)
+(arrow_expr
+  property: (string) @variable.member)
 (static_expr
   property: (ident) @variable.member.static)
+(static_expr
+  property: (string) @variable.member.static)
 
 ;────────────────────────────
 ; Function Calls
@@ -82,6 +89,16 @@
 (this) @variable.builtin
 
 ;────────────────────────────
+; Language constants
+;────────────────────────────
+(null) @constant.builtin
+(true) @constant.builtin
+(false) @constant.builtin
+; Runtime value-position globals — no `.gcl` decl, parse as plain idents.
+((ident) @constant.builtin
+ (#any-of? @constant.builtin "NaN" "Infinity"))
+
+;────────────────────────────
 ; Operators
 ;────────────────────────────
 [
@@ -115,6 +132,7 @@
 (throw_stmt "throw" @keyword.control)
 (break_stmt "break" @keyword.control)
 (continue_stmt "continue" @keyword.control)
+(breakpoint_stmt "breakpoint" @keyword.control)
 
 ;────────────────────────────
 ; Object / struct / enum body
