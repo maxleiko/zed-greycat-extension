@@ -37,6 +37,8 @@
 ;────────────────────────────
 (member_expr
   property: (ident) @variable.member)
+(arrow_expr
+  property: (ident) @variable.member)
 (static_expr
   property: (ident) @variable.member.static)
 
@@ -47,6 +49,9 @@
   fn: (ident) @function.call)
 (call_expr
   fn: (member_expr
+        property: (ident) @function.method.call))
+(call_expr
+  fn: (arrow_expr
         property: (ident) @function.method.call))
 (call_expr
   fn: (static_expr
