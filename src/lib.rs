@@ -92,40 +92,64 @@ impl Extension for GreyCatExtension {
         _language_server_id: &LanguageServerId,
         completion: Completion,
     ) -> Option<CodeLabel> {
-        // Only fn / method items get the rich rendering. The LSP
-        // server emits the compact `(args): Ret` form in
-        // `detail` (mirrored from `label_details.detail`); we
-        // synthesize a complete `fn name(args): Ret` fragment so
-        // Zed's tree-sitter pass recognizes it as a `fn_decl` and
-        // applies function / parameter / type highlights from the
-        // GreyCat `highlights.scm` query.
-        //
-        // We then declare display spans for the name + sig portions
-        // only, hiding the synthetic `fn ` prefix from the popup row.
+        // The LSP server emits source-shaped strings in `detail` so
+        // Zed's tree-sitter pass can apply highlights from the
+        // GreyCat `highlights.scm` query. For each completion kind
+        // we synthesize a complete parseable fragment as `code` and
+        // declare display spans that hide the synthetic prefix.
         let kind = completion.kind?;
-        if !matches!(kind, CompletionKind::Function | CompletionKind::Method) {
-            return None;
-        }
-        let detail = completion.detail.as_deref()?;
-        if !detail.starts_with('(') {
-            // Compact form is `(args): Ret`. If the LSP layer ever
-            // emits a different shape, fall back to default
-            // rendering instead of guessing.
-            return None;
-        }
         let name = &completion.label;
-        let code = format!("fn {name}{detail}");
-        let name_start = "fn ".len() as u32;
-        let name_end = name_start + name.len() as u32;
-        let detail_end = code.len() as u32;
-        Some(CodeLabel {
-            spans: vec![
-                CodeLabelSpan::code_range(name_start..name_end),
-                CodeLabelSpan::code_range(name_end..detail_end),
-            ],
-            filter_range: (0..(name.len() as u32)).into(),
-            code,
-        })
+        match kind {
+            // Fns / methods — `detail` is the compact `(args): Ret`
+            // form. Wrap as `fn name(args): Ret` so the name is
+            // recognized as a `fn_decl` name, args as `fn_param`s,
+            // types as `type_ident`s.
+            CompletionKind::Function | CompletionKind::Method => {
+                let detail = completion.detail.as_deref()?;
+                if !detail.starts_with('(') {
+                    return None;
+                }
+                let code = format!("fn {name}{detail}");
+                let name_start = "fn ".len() as u32;
+                let name_end = name_start + name.len() as u32;
+                let detail_end = code.len() as u32;
+                Some(CodeLabel {
+                    spans: vec![
+                        CodeLabelSpan::code_range(name_start..name_end),
+                        CodeLabelSpan::code_range(name_end..detail_end),
+                    ],
+                    filter_range: (0..(name.len() as u32)).into(),
+                    code,
+                })
+            }
+            // Types / enums — `detail` is the home module's stem
+            // (e.g. `runtime`). Wrap as `type Name {}` / `enum
+            // Name {}` so the name renders in `@type.definition`
+            // color, then append the module label dimmed via the
+            // `@comment` highlight.
+            CompletionKind::Class | CompletionKind::Enum => {
+                let module = completion.detail.as_deref().unwrap_or("");
+                let keyword = if matches!(kind, CompletionKind::Class) {
+                    "type"
+                } else {
+                    "enum"
+                };
+                let code = format!("{keyword} {name} {{}}");
+                let name_start = (keyword.len() + 1) as u32;
+                let name_end = name_start + name.len() as u32;
+                let mut spans = vec![CodeLabelSpan::code_range(name_start..name_end)];
+                if !module.is_empty() {
+                    spans.push(CodeLabelSpan::literal("  ", None));
+                    spans.push(CodeLabelSpan::literal(module, Some("comment".into())));
+                }
+                Some(CodeLabel {
+                    spans,
+                    filter_range: (0..(name.len() as u32)).into(),
+                    code,
+                })
+            }
+            _ => None,
+        }
     }
 }
 
