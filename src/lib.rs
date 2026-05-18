@@ -1,3 +1,4 @@
+use zed_extension_api::lsp::{Completion, CompletionKind};
 use zed_extension_api::settings::LspSettings;
 use zed_extension_api::*;
 
@@ -84,6 +85,47 @@ impl Extension for GreyCatExtension {
                 .unwrap_or_default()
                 .initialization_options,
         )
+    }
+
+    fn label_for_completion(
+        &self,
+        _language_server_id: &LanguageServerId,
+        completion: Completion,
+    ) -> Option<CodeLabel> {
+        // Only fn / method items get the rich rendering. The LSP
+        // server emits the compact `(args): Ret` form in
+        // `detail` (mirrored from `label_details.detail`); we
+        // synthesize a complete `fn name(args): Ret` fragment so
+        // Zed's tree-sitter pass recognizes it as a `fn_decl` and
+        // applies function / parameter / type highlights from the
+        // GreyCat `highlights.scm` query.
+        //
+        // We then declare display spans for the name + sig portions
+        // only, hiding the synthetic `fn ` prefix from the popup row.
+        let kind = completion.kind?;
+        if !matches!(kind, CompletionKind::Function | CompletionKind::Method) {
+            return None;
+        }
+        let detail = completion.detail.as_deref()?;
+        if !detail.starts_with('(') {
+            // Compact form is `(args): Ret`. If the LSP layer ever
+            // emits a different shape, fall back to default
+            // rendering instead of guessing.
+            return None;
+        }
+        let name = &completion.label;
+        let code = format!("fn {name}{detail}");
+        let name_start = "fn ".len() as u32;
+        let name_end = name_start + name.len() as u32;
+        let detail_end = code.len() as u32;
+        Some(CodeLabel {
+            spans: vec![
+                CodeLabelSpan::code_range(name_start..name_end),
+                CodeLabelSpan::code_range(name_end..detail_end),
+            ],
+            filter_range: (0..(name.len() as u32)).into(),
+            code,
+        })
     }
 }
 
