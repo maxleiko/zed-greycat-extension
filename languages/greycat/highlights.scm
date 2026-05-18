@@ -20,6 +20,7 @@
 ;────────────────────────────
 (ident) @variable
 (type_ident name: (ident) @type)
+(type_params (ident) @type)
 (type_decl name: (ident) @type.definition)
 (enum_decl name: (ident) @type.definition)
 (enum_field (ident) @constant)
