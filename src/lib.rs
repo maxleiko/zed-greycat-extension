@@ -148,6 +148,36 @@ impl Extension for GreyCatExtension {
                     code,
                 })
             }
+            // Type attributes (instance + static) — `detail` is the
+            // compact `: T` form. Wrap as `type _ { name: T; }` for
+            // instance attrs and `type _ { static name: T; }` for
+            // statics, so tree-sitter highlights the name as
+            // `@field` / `@variable.member.static` and `T` as a
+            // type ident.
+            CompletionKind::Field | CompletionKind::Constant => {
+                let detail = completion.detail.as_deref()?;
+                if !detail.starts_with(':') {
+                    return None;
+                }
+                let static_prefix = if matches!(kind, CompletionKind::Constant) {
+                    "static "
+                } else {
+                    ""
+                };
+                let code = format!("type _ {{ {static_prefix}{name}{detail}; }}");
+                let prefix_len = "type _ { ".len() + static_prefix.len();
+                let name_start = prefix_len as u32;
+                let name_end = name_start + name.len() as u32;
+                let detail_end = name_end + detail.len() as u32;
+                Some(CodeLabel {
+                    spans: vec![
+                        CodeLabelSpan::code_range(name_start..name_end),
+                        CodeLabelSpan::code_range(name_end..detail_end),
+                    ],
+                    filter_range: (0..(name.len() as u32)).into(),
+                    code,
+                })
+            }
             _ => None,
         }
     }
